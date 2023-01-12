@@ -1,4 +1,6 @@
 #include "Map.h"
+#include "Enemy.h"
+#include <vector>
 
 /// <summary>
 /// Sets the needed variables
@@ -19,6 +21,7 @@ void Draw();
 
 enum USER_INPUTS { NONE, UP, DOWN, RIGHT, LEFT, QUIT };
 Map pacman_map = Map();
+std::vector<Enemy> enemigos = std::vector<Enemy>();
 char player_char = 'O';
 int player_x = 1;
 int player_y = 1;
@@ -41,6 +44,19 @@ int main()
 void Setup()
 {
     std::cout.sync_with_stdio(false);
+
+    srand(time(NULL));
+
+    int enemy_count = 0;
+
+    std::cout << "How any enemies do you want?" << std::endl;
+    std::cin >> enemy_count;
+
+    for (size_t i = 0; i < enemy_count; i++)
+    {
+        enemigos.push_back(Enemy(pacman_map.spawn_enemy));
+    }
+
     player_x = pacman_map.spawn_player.X;
     player_y = pacman_map.spawn_player.Y;
 }
@@ -83,6 +99,13 @@ void Logic()
     }
     else
     {
+        COORD playerPos;
+        playerPos.X = player_x;
+        playerPos.Y = player_y;
+        for (size_t i = 0; i < enemigos.size(); i++)
+        {
+            enemigos[i].Logic(&pacman_map);
+        }
         int player_y_new = player_y;
         int player_x_new = player_x;
         switch (input)
@@ -140,6 +163,10 @@ void Draw()
 {
     ConsoleUtils::Console_SetPos(0,0);
     pacman_map.Draw();
+    for (size_t i = 0; i < enemigos.size(); i++)
+    {
+        enemigos[i].Draw();
+    }
     ConsoleUtils::Console_SetPos(player_x, player_y);
     ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::DARK_YELLOW);
     std::cout << player_char;
