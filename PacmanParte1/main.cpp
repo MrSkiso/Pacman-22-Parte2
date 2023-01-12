@@ -1,5 +1,6 @@
 #include "Map.h"
 #include "Enemy.h"
+#include "TimeManager.h"
 #include <vector>
 
 /// <summary>
@@ -49,7 +50,7 @@ void Setup()
 
     int enemy_count = 0;
 
-    std::cout << "How any enemies do you want?" << std::endl;
+    std::cout << "How many enemies do you want?" << std::endl;
     std::cin >> enemy_count;
 
     for (size_t i = 0; i < enemy_count; i++)
@@ -102,9 +103,17 @@ void Logic()
         COORD playerPos;
         playerPos.X = player_x;
         playerPos.Y = player_y;
+        bool playerDie = false;
         for (size_t i = 0; i < enemigos.size(); i++)
         {
-            enemigos[i].Logic(&pacman_map);
+            playerDie = enemigos[i].Logic(&pacman_map, playerPos);
+            if (enemigos[i].Logic(&pacman_map, playerPos)) {
+                playerDie = true;
+            }
+        }
+        if (playerDie) {
+            player_x = pacman_map.spawn_player.X;
+            player_y = pacman_map.spawn_player.Y;
         }
         int player_y_new = player_y;
         int player_x_new = player_x;
@@ -173,9 +182,16 @@ void Draw()
     ConsoleUtils::Console_ClearCharacter({ 0,(short)pacman_map.Height });
     ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::CYAN);
     std::cout << "Puntuacion actual: " << player_points << " Puntuacion pendiente: " << pacman_map.points << std::endl;
+
+    std::cout << "Fotogramas: " << TimeManager::getInstance().frameCount << std::endl;
+    std::cout << "DeltaTime: " << TimeManager::getInstance().deltaTime << std::endl;
+    std::cout << "Time: " << TimeManager::getInstance().time << std::endl;
+
     if (win)
     {
         ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::GREEN);
         std::cout << "Has ganado!" << std::endl;
     }
+
+    TimeManager::getInstance().nextFrame();
 }
