@@ -9,7 +9,7 @@ public:
 	/// <summary>
 	/// The map tiles and it's symbols
 	/// </summary>
-	enum MAP_TILES { MAP_EMPTY = ' ', MAP_WALL = '#', MAP_POINT = '.'};
+	enum MAP_TILES { MAP_EMPTY = ' ', MAP_WALL = '#', MAP_POINT = '.' };
 	/// <summary>
 	/// The background color given a map tile
 	/// </summary>
@@ -74,4 +74,3 @@ public:
 	/// <param name="_tile">The tile to replace</param>
 	void SetTile(int _x, int _y, MAP_TILES _tile);
 };
-
