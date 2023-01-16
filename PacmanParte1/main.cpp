@@ -23,6 +23,9 @@ void Draw();
 
 enum USER_INPUTS { NONE, UP, DOWN, RIGHT, LEFT, QUIT };
 Map pacman_map = Map();
+int enemy_count = 0;
+float enemy_countdown = 0;
+#define tiempo_respawn 10
 Player player = Player(pacman_map.spawn_player);
 std::vector<Enemy> enemigos = std::vector<Enemy>();
 Map::USER_INPUTS input = Map::USER_INPUTS::NONE;
@@ -47,15 +50,15 @@ void Setup()
 
     srand(time(NULL));
 
-    int enemy_count = 0;
+    
 
     std::cout << "How many enemies do you want?" << std::endl;
     std::cin >> enemy_count;
 
-    for (size_t i = 0; i < enemy_count; i++)
-    {
-        enemigos.push_back(Enemy(pacman_map.spawn_enemy));
-    }
+    //for (size_t i = 0; i < enemy_count; i++)
+    //{
+     //   enemigos.push_back(Enemy(pacman_map.spawn_enemy));
+   // }
 
 }
 
@@ -97,6 +100,12 @@ void Logic()
     
     if(!win && !lose)
     {
+        enemy_countdown += TimeManager::getInstance().deltaTime;
+        if (enemigos.size() < enemy_count && enemy_countdown > tiempo_respawn)
+        {
+            enemigos.push_back(Enemy(pacman_map.spawn_enemy));
+            enemy_countdown = 0;
+        }
         player.Logic(input, &pacman_map, &enemigos);
 
         if (player.lifes <= 0) 
@@ -128,6 +137,7 @@ void Draw()
     std::cout << "Fotogramas: " << TimeManager::getInstance().frameCount << std::endl;
     std::cout << "DeltaTime: " << TimeManager::getInstance().deltaTime << std::endl;
     std::cout << "Time: " << TimeManager::getInstance().time << std::endl;
+    std::cout << enemy_countdown << std::endl;
 
     if (win)
     {
