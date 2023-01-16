@@ -2,10 +2,12 @@
 
 #include "ConsoleUtils.h"
 #include <map>
+#include <vector>
 
 class Map
 {
 public:
+	enum USER_INPUTS { NONE, UP, DOWN, RIGHT, LEFT, QUIT };
 	/// <summary>
 	/// The map tiles and it's symbols
 	/// </summary>

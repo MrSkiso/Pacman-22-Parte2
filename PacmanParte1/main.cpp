@@ -2,6 +2,7 @@
 #include "Enemy.h"
 #include "TimeManager.h"
 #include <vector>
+#include "Player.h"
 
 /// <summary>
 /// Sets the needed variables
@@ -22,14 +23,12 @@ void Draw();
 
 enum USER_INPUTS { NONE, UP, DOWN, RIGHT, LEFT, QUIT };
 Map pacman_map = Map();
+Player player = Player(pacman_map.spawn_player);
 std::vector<Enemy> enemigos = std::vector<Enemy>();
-char player_char = 'O';
-int player_x = 1;
-int player_y = 1;
-int player_points = 0;
-USER_INPUTS input = USER_INPUTS::NONE;
+Map::USER_INPUTS input = Map::USER_INPUTS::NONE;
 bool run = true;
 bool win = false;
+bool lose = false;
 
 int main()
 {
@@ -58,109 +57,53 @@ void Setup()
         enemigos.push_back(Enemy(pacman_map.spawn_enemy));
     }
 
-    player_x = pacman_map.spawn_player.X;
-    player_y = pacman_map.spawn_player.Y;
 }
 
 void Input()
 {
-    input = USER_INPUTS::NONE;
+    input = Map::USER_INPUTS::NONE;
     if (ConsoleUtils::KeyPressed(VK_UP) || ConsoleUtils::KeyPressed('W'))
     {
-        input = USER_INPUTS::UP;
+        input = Map::USER_INPUTS::UP;
     }
     if (ConsoleUtils::KeyPressed(VK_DOWN) || ConsoleUtils::KeyPressed('S'))
     {
-        input = USER_INPUTS::DOWN;
+        input = Map::USER_INPUTS::DOWN;
     }
     if (ConsoleUtils::KeyPressed(VK_RIGHT) || ConsoleUtils::KeyPressed('D'))
     {
-        input = USER_INPUTS::RIGHT;
+        input = Map::USER_INPUTS::RIGHT;
     }
     if (ConsoleUtils::KeyPressed(VK_LEFT) || ConsoleUtils::KeyPressed('A'))
     {
-        input = USER_INPUTS::LEFT;
+        input = Map::USER_INPUTS::LEFT;
     }
     if (ConsoleUtils::KeyPressed(VK_ESCAPE) || ConsoleUtils::KeyPressed('Q'))
     {
-        input = USER_INPUTS::QUIT;
+        input = Map::USER_INPUTS::QUIT;
     }
 }
 
 void Logic()
 {
-    if (win)
+    
+    
+    switch (input)
     {
-        switch (input)
-        {
-        case QUIT:
-            run = false;
-            break;
-        }
+    case Map::QUIT:
+        run = false;
+        return;
     }
-    else
+    
+    if(!win && !lose)
     {
-        COORD playerPos;
-        playerPos.X = player_x;
-        playerPos.Y = player_y;
-        bool playerDie = false;
-        for (size_t i = 0; i < enemigos.size(); i++)
-        {
-            playerDie = enemigos[i].Logic(&pacman_map, playerPos);
-            if (enemigos[i].Logic(&pacman_map, playerPos)) {
-                playerDie = true;
-            }
-        }
-        if (playerDie) {
-            player_x = pacman_map.spawn_player.X;
-            player_y = pacman_map.spawn_player.Y;
-        }
-        int player_y_new = player_y;
-        int player_x_new = player_x;
-        switch (input)
-        {
-        case UP:
-            player_y_new--;
-            break;
-        case DOWN:
-            player_y_new++;
-            break;
-        case RIGHT:
-            player_x_new++;
-            break;
-        case LEFT:
-            player_x_new--;
-            break;
-        case QUIT:
-            run = false;
-            break;
-        }
-        if (player_x_new < 0)
-        {
-            player_x_new = pacman_map.Width - 1;
-        }
-        player_x_new %= pacman_map.Width;
-        if (player_y_new < 0)
-        {
-            player_y_new = pacman_map.Height - 1;
-        }
-        player_y_new %= pacman_map.Height;
+        player.Logic(input, &pacman_map, &enemigos);
 
-        switch (pacman_map.GetTile(player_x_new, player_y_new))
+        if (player.lifes <= 0) 
         {
-        case Map::MAP_TILES::MAP_WALL:
-            player_y_new = player_y;
-            player_x_new = player_x;
-            break;
-        case Map::MAP_TILES::MAP_POINT:
-            pacman_map.points--;
-            player_points++;
-            pacman_map.SetTile(player_x_new, player_y_new, Map::MAP_TILES::MAP_EMPTY);
-            break;
+            lose = true;
         }
 
-        player_y = player_y_new;
-        player_x = player_x_new;
         if (pacman_map.points <= 0)
         {
             win = true;
@@ -176,12 +119,11 @@ void Draw()
     {
         enemigos[i].Draw();
     }
-    ConsoleUtils::Console_SetPos(player_x, player_y);
-    ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::DARK_YELLOW);
-    std::cout << player_char;
+    player.Draw();
     ConsoleUtils::Console_ClearCharacter({ 0,(short)pacman_map.Height });
     ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::CYAN);
-    std::cout << "Puntuacion actual: " << player_points << " Puntuacion pendiente: " << pacman_map.points << std::endl;
+    std::cout << "Puntuacion actual: " << player.player_points << " Puntuacion pendiente: " << pacman_map.points << std::endl;
+    std::cout << "Vidas actuales: " << player.lifes << std::endl;
 
     std::cout << "Fotogramas: " << TimeManager::getInstance().frameCount << std::endl;
     std::cout << "DeltaTime: " << TimeManager::getInstance().deltaTime << std::endl;
@@ -191,6 +133,12 @@ void Draw()
     {
         ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::GREEN);
         std::cout << "Has ganado!" << std::endl;
+    }
+
+    if (lose)
+    {
+        ConsoleUtils::Console_SetColor(ConsoleUtils::CONSOLE_COLOR::RED);
+        std::cout << "Has perdido!" << std::endl;
     }
 
     TimeManager::getInstance().nextFrame();
