@@ -49,3 +49,4 @@ void Enemy::Draw()
 	ConsoleUtils::Console_SetColor(foreground, background);
 	std::cout << character;
 }
+

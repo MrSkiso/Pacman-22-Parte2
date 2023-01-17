@@ -2,14 +2,16 @@
 
 #include "ConsoleUtils.h"
 #include <map>
+#include <vector>
 
 class Map
 {
 public:
+	enum USER_INPUTS { NONE, UP, DOWN, RIGHT, LEFT, QUIT };
 	/// <summary>
 	/// The map tiles and it's symbols
 	/// </summary>
-	enum MAP_TILES { MAP_EMPTY = ' ', MAP_WALL = '#', MAP_POINT = '.'};
+	enum MAP_TILES { MAP_EMPTY = ' ', MAP_WALL = '#', MAP_POINT = '.' };
 	/// <summary>
 	/// The background color given a map tile
 	/// </summary>

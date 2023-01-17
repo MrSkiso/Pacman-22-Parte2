@@ -1,3 +1,4 @@
+
 #pragma once
 #include<chrono>
 
@@ -14,4 +15,5 @@ public:
 
 	void nextFrame();
 };
+
 
